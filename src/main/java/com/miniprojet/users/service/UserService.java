@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.miniprojet.users.entities.Role;
 import com.miniprojet.users.entities.User;
+import com.miniprojet.users.register.RegistationRequest;
 
 @Service
 public interface UserService {
@@ -19,4 +20,10 @@ public interface UserService {
 	User addRoleToUser(String username, String rolename);
 	
 	List<User> findAllUsers();
+	
+	User registerUser(RegistationRequest request);
+	
+	User validateToken(String code);
+
+
 }

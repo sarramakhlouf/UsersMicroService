@@ -1,7 +1,7 @@
 package com.miniprojet.users.security;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,24 +17,23 @@ import com.miniprojet.users.service.UserService;
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findUserByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("Utilisateur introuvable !");
-        }
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user = userService.findUserByUsername(username);
+		if (user == null) {
+			throw new UsernameNotFoundException("Utilisateur introuvable !");
+		}
 
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-            .map(role -> new SimpleGrantedAuthority(role.getRole()))
-            .collect(Collectors.toList());
+		List<GrantedAuthority> auths = new ArrayList<>();
+		user.getRoles().forEach(role -> {
+			GrantedAuthority authority = new SimpleGrantedAuthority(role.getRole());
+			auths.add(authority);
+		});
 
-        return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            authorities
-        );
-    }
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+			user.getEnabled(), true, true, true, auths);
+	}
 }

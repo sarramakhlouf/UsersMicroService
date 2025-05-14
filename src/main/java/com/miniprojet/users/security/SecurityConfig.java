@@ -27,24 +27,28 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authMgr) throws Exception {
-		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
-					@Override
-					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-						CorsConfiguration cors = new CorsConfiguration();
-
-						cors.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-						cors.setAllowedMethods(Collections.singletonList("*"));
-						cors.setAllowedHeaders(Collections.singletonList("*"));
-						cors.setExposedHeaders(Collections.singletonList("Authorization"));
-						return cors;
-					}
-				}))
-
-				.authorizeHttpRequests(
-						requests -> requests.requestMatchers("/login").permitAll().anyRequest().authenticated())
-				.addFilterBefore(new JWTAuthenticationFilter(authMgr), UsernamePasswordAuthenticationFilter.class)
-				.addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-		return http.build();
+	    http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	        .csrf(csrf -> csrf.disable())
+	        .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
+	            @Override
+	            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+	                CorsConfiguration cors = new CorsConfiguration();
+	                cors.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+	                cors.setAllowedMethods(Collections.singletonList("*"));
+	                cors.setAllowedHeaders(Collections.singletonList("*"));
+	                cors.setExposedHeaders(Collections.singletonList("Authorization"));
+	                cors.setAllowCredentials(true);
+	                cors.setMaxAge(3600L);
+	                return cors;
+	            }
+	        }))
+	        .authorizeHttpRequests(
+	            requests -> requests
+	                .requestMatchers("/register/**", "/login", "/verifyEmail/**").permitAll()  // Allow unauthenticated access to these routes
+	                .anyRequest().authenticated()
+	        )
+	        .addFilterBefore(new JWTAuthenticationFilter(authMgr), UsernamePasswordAuthenticationFilter.class)
+	        .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+	    return http.build();
 	}
 }
