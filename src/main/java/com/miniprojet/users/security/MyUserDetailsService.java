@@ -17,23 +17,37 @@ import com.miniprojet.users.service.UserService;
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
-	@Autowired
-	private UserService userService;
+    private final SecurityBeansConfiguration securityBeansConfiguration;
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userService.findUserByUsername(username);
-		if (user == null) {
-			throw new UsernameNotFoundException("Utilisateur introuvable !");
-		}
+    @Autowired
+    private UserService userService;
 
-		List<GrantedAuthority> auths = new ArrayList<>();
-		user.getRoles().forEach(role -> {
-			GrantedAuthority authority = new SimpleGrantedAuthority(role.getRole());
-			auths.add(authority);
-		});
+    MyUserDetailsService(SecurityBeansConfiguration securityBeansConfiguration) {
+        this.securityBeansConfiguration = securityBeansConfiguration;
+    }
 
-		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-			user.getEnabled(), true, true, true, auths);
-	}
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userService.findUserByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Utilisateur introuvable !");
+        }
+
+        /*List<GrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRole())));*/
+        
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRole()));
+        });
+
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.getEnabled(),
+                true, true, true,
+                authorities
+        );
+    }
 }

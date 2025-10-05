@@ -20,23 +20,23 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 	}
 	
-	/*@Bean
+	@Bean
 	CommandLineRunner run(UserService userService) {
 		return args -> {
 			// ajouter les rôles
-			userService.addRole(new Role(null, "ADMIN"));
-			userService.addRole(new Role(null, "USER"));
+			//userService.addRole(new Role(null, "ADMIN"));
+			//userService.addRole(new Role(null, "USER"));
 			// ajouter les utilisateurs
-			userService.saveUser(new User(null, "admin", "123", true, null));
+			/*userService.saveUser(new User(null, "admin", "123", true, null));
 			userService.saveUser(new User(null, "sarra", "123", true, null));
 			userService.saveUser(new User(null, "fatma", "123", true, null));
 			// affecter les rôles
 			userService.addRoleToUser("admin", "ADMIN");
 			userService.addRoleToUser("admin", "USER");
 			userService.addRoleToUser("sarra", "USER");
-			userService.addRoleToUser("fatma", "USER");
+			userService.addRoleToUser("fatma", "USER");*/
 		};
-	}*/
+	}
 	
 	/*@Bean
 	BCryptPasswordEncoder getBCE() {

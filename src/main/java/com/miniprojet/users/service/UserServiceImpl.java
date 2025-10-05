@@ -20,6 +20,7 @@ import com.miniprojet.users.register.VerificationToken;
 import com.miniprojet.users.register.VerificationTokenRepository;
 import com.miniprojet.users.repos.RoleRepository;
 import com.miniprojet.users.repos.UserRepository;
+import com.miniprojet.users.util.EmailService;
 import com.miniprojet.users.exception.InvalidTokenException;
 
 @Transactional
@@ -29,6 +30,8 @@ public class UserServiceImpl implements UserService {
 	UserRepository userRep;
 	@Autowired
 	RoleRepository roleRep;
+	@Autowired
+	private EmailService emailService;
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired
@@ -44,12 +47,19 @@ public class UserServiceImpl implements UserService {
 	public User addRoleToUser(String username, String rolename) {
 		User usr = userRep.findByUsername(username);
 		Role r = roleRep.findByRole(rolename);
-		usr.getRoles().add(r);
+		if (usr != null && r != null && !usr.getRoles().contains(r)) {
+	        usr.getRoles().add(r);
+	        usr = userRep.save(usr); 
+	    }
 		return usr;
 	}
 
 	@Override
 	public Role addRole(Role role) {
+		Role existing = roleRep.findByRole(role.getRole());
+	    if (existing != null) {
+	        return existing; 
+	    }
 		return roleRep.save(role);
 	}
 
@@ -73,13 +83,18 @@ public class UserServiceImpl implements UserService {
 		newUser.setEmail(request.getEmail());
 		newUser.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
 		newUser.setEnabled(false);
-		userRep.save(newUser);
-		// ajouter à newUser le role par défaut USER
-		Role r = roleRep.findByRole("USER");
+		
+		Role r = roleRep.findByRole("USER"); 
+		if (r == null) {
+	        r = new Role();
+	        r.setRole("USER");
+	        roleRep.save(r);
+	    }
+		
 		List<Role> roles = new ArrayList<>();
 		roles.add(r);
 		newUser.setRoles(roles);
-
+		
 		userRep.save(newUser);
 
 		// génére le code secret
@@ -87,6 +102,11 @@ public class UserServiceImpl implements UserService {
 		VerificationToken token = new VerificationToken(code, newUser);
 		verificationTokenRepo.save(token);
 
+		String emailContent = "<h1>Confirme ton email</h1>"
+	            + "<p>Voici ton code de confirmation : " + code + "</p>";
+
+	    emailService.sendEmail(newUser.getEmail(), emailContent);
+	    
 		return newUser;
 	}
 

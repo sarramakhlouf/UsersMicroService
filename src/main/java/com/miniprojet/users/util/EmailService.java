@@ -10,19 +10,27 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Service
 public class EmailService implements EmailSender {
-	private final JavaMailSender mailSender;
 
-	public void sendEmail(String to, String email) {
-		try {
-			MimeMessage mimeMessage = mailSender.createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-			helper.setText(email, true);
-			helper.setTo(to);
-			helper.setSubject("Confirm your email");
-			helper.setFrom("sarrahmakhlouf2022@gmail.com");
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new IllegalStateException("failed to send email");
-		}
-	}
+    private final JavaMailSender mailSender;
+
+    @Override
+    public void sendEmail(String to, String emailContent) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+            helper.setText(emailContent, true);
+
+            helper.setTo(to);
+            helper.setFrom("sarramk46@gmail.com"); 
+            helper.setSubject("Confirm your email");
+
+            mailSender.send(mimeMessage);
+
+            System.out.println("Email envoyé avec succès à " + to);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Échec de l'envoi de l'email : " + e.getMessage());
+        }
+    }
 }

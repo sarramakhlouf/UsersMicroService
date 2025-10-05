@@ -1,5 +1,6 @@
 package com.miniprojet.users.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,5 +17,7 @@ public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long role_id;
-	private String role;
+	
+	@Column(unique = true)
+	private String role;	
 }
